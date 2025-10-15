@@ -33,6 +33,22 @@ public:
     }
 };
 
+class LineSegment
+{
+private:
+    Point p1, p2;
+
+public:
+    LineSegment(Point p1_val, Point p2_val) : p1(p1_val), p2(p2_val) {}
+
+    ~LineSegment() { std::cout << "Line segment destroyed"; }
+
+    float length()
+    {
+        return p1.distance_to(p2);
+    }
+};
+
 class Rectangle
 {
     float width, height;
@@ -58,6 +74,9 @@ int main()
 
     std::cout << "Distance from p_p to p: " << distance_p_p_to_p << "\n";
     std::cout << "Distance from p to p_p: " << distance_p_to_p_p << "\n";
+    LineSegment l(p, *p_p);
+    std::cout << "Lenght of l: " << l.length() << "\n";
+
     delete p_p; // manually destroyed
 
     Rectangle r(2.3f, 4.1f);
