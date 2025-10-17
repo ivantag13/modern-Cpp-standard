@@ -7,8 +7,17 @@ private:
     float x, y; // Encapsulated data
 
 public:
+    // Empty constructor
+    Point() : x(), y() {}
+
     // Constructor
     Point(float x_val, float y_val) : x(x_val), y(y_val) {}
+
+    // Copy constructor
+    Point(const Point &other) : x(other.getX()), y(other.getY())
+    {
+        std::cout << "Copied Point\n";
+    }
 
     ~Point() { std::cout << "Point destroyed.\n"; }
 
@@ -22,8 +31,8 @@ public:
     // Method
     void translate(float dx, float dy)
     {
-        x += dx;
-        y += dy;
+        this->x += dx;
+        this->y += dy;
     }
 
     float norm(Point p) const
@@ -40,6 +49,20 @@ public:
     {
         return Point(this->x - other.getX(), this->y - other.getY());
     }
+
+    // Copy assignement operator
+    Point &operator=(const Point &other)
+    {
+        if (this != &other)
+        { // Avoids self assignment by checking the same memory space addresses
+            this->x = other.getX();
+            this->y = other.getY();
+        }
+        std::cout << "Assigned Point \n";
+        return *this;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const Point &p);
 
     bool operator==(const Point &other) const
     {
@@ -61,21 +84,60 @@ public:
     }
 };
 
+std::ostream &operator<<(std::ostream &os, const Point &p)
+{
+    os << "(" << p.x << ", " << p.y << ")";
+    return os;
+}
+
 class LineSegment
 {
 private:
     Point p1, p2;
 
 public:
+    LineSegment() : p1(), p2() {}
+
     LineSegment(const Point &p1_val, const Point &p2_val) : p1(p1_val), p2(p2_val) {}
 
+    LineSegment(const LineSegment &other) : p1(other.p1), p2(other.p2) {}
+
     ~LineSegment() { std::cout << "Line segment destroyed\n"; }
+
+    void translate(float dx, float dy)
+    {
+        this->p1.translate(dx, dy);
+        this->p2.translate(dx, dy);
+    }
+
+    LineSegment &operator=(const LineSegment &other)
+    {
+        if (this != &other)
+        {
+            this->p1 = other.p1;
+            this->p2 = other.p2;
+        }
+        return *this;
+    }
+
+    bool operator==(const LineSegment &other) const
+    {
+        return this->p1 == other.p1 && this->p2 == other.p2;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const LineSegment &line);
 
     float length() const
     {
         return p1.distance_to(p2);
     }
 };
+
+std::ostream &operator<<(std::ostream &os, const LineSegment &line)
+{
+    os << "[ " << line.p1 << " -> " << line.p2 << " ]";
+    return os;
+}
 
 class Rectangle
 {
@@ -98,12 +160,18 @@ int main()
     p_p->print();
 
     Point c = p + *p_p;
-    std::cout << "Print point c: ";
-    c.print();
+    std::cout << "Print point c: " << c << "\n";
 
     Point d = p - *p_p;
     std::cout << "Print point d: ";
     d.print();
+
+    Point e;
+    e = d;
+    std::cout << "Point d assigned to e: " << e << "\n";
+
+    Point f(e);
+    std::cout << "Point f constructed using point e: " << f << "\n";
 
     std::cout << "Is c equal to d: " << (d == c) << "\n";
 
@@ -114,6 +182,16 @@ int main()
     std::cout << "Distance from p to p_p: " << distance_p_to_p_p << "\n";
     LineSegment l(p, *p_p);
     std::cout << "Lenght of l: " << l.length() << "\n";
+    LineSegment t(p, d);
+    LineSegment k;
+    k = t;
+
+    std::cout << "Is t " << t << " == l " << l << " : " << (t == l) << "\n";
+    std::cout << "Is t" << t << " == k " << k << " : " << (t == k) << "\n";
+
+    k.translate(c.getX(), c.getY());
+
+    std::cout << "Is t " << t << " == k (translated) " << k << " : " << (t == k) << "\n";
 
     delete p_p; // manually destroyed
 
