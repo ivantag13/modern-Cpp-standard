@@ -6,9 +6,18 @@
 #include <string>
 
 template <typename T>
-T max_value(T a, T b)
+T max_value(const T a, const T b)
 {
     return (a > b) ? a : b;
+}
+
+template <typename T>
+T average(const std::vector<T> &v)
+{
+    T sum = {};
+    for (auto &x : v)
+        sum += x;
+    return sum / v.size();
 }
 
 class Point
@@ -165,10 +174,11 @@ public:
     float area() const { return width * height; }
 };
 
+template <typename T>
 class ShapeCollection
 {
 private:
-    std::vector<LineSegment> shape;
+    std::vector<T> shapes;
 
 public:
     // Empty constructor
@@ -177,21 +187,21 @@ public:
     // ShapeCollection() : shape() {}
 
     // Constructor
-    void add(const LineSegment &line)
+    void add(const T &elem)
     {
-        this->shape.emplace_back(line);
+        this->shapes.emplace_back(elem);
     }
 
     void translate_all(const Point &delta)
     {
-        for (auto &line : this->shape)
-            line.translate(delta.getX(), delta.getY());
+        for (auto &elem : this->shapes)
+            elem.translate(delta.getX(), delta.getY());
     }
 
     void print_all() const
     {
-        for (const auto &line : this->shape)
-            std::cout << line << "\n";
+        for (const auto &elem : this->shapes)
+            std::cout << elem << "\n";
     }
 
     ~ShapeCollection()
@@ -250,16 +260,34 @@ int main()
     float area = r.area();
     std::cout << "Area: " << area << " \n";
 
-    ShapeCollection shape;
-    shape.add(l);
-    shape.add(t);
-    shape.add(k);
+    ShapeCollection<Point> pointCloud;
+    ShapeCollection<LineSegment> lineCloud;
 
-    std::cout << "Original Collection of Shapes: \n";
-    shape.print_all();
-    shape.translate_all(d);
-    std::cout << "Translated Collection of Shapes by d: " << d << "\n";
-    shape.print_all();
+    pointCloud.add(p);
+    pointCloud.add(*p_p);
+
+    lineCloud.add(l);
+    lineCloud.add(t);
+    lineCloud.add(k);
+
+    std::cout << "Original Collection of Points: \n";
+    pointCloud.print_all();
+    pointCloud.translate_all(d);
+    std::cout << "Translated Collection of Points by d: " << d << "\n";
+    pointCloud.print_all();
+
+    std::cout << "Original Collection of Lines: \n";
+    lineCloud.print_all();
+    lineCloud.translate_all(d);
+    std::cout << "Translated Collection of Lines by d: " << d << "\n";
+    lineCloud.print_all();
+
+    std::vector<int> v = {3, 4, 1, 2, 9};
+    std::cout << "Point p: " << p << " with Max coordinates : " << max_value(p.getX(), p.getY()) << "\n";
+    std::cout << "Vector v: ";
+    for (auto &x : v)
+        std::cout << x << " ";
+    std::cout << ", with average = " << average(v) << "\n";
 
     return 0; // RAII (Resource Acquisition Is Initialization) takes care of freeing any used memory
 }
