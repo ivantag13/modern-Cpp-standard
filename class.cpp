@@ -1,5 +1,15 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
+#include <map>
+#include <memory>
+#include <string>
+
+template <typename T>
+T max_value(T a, T b)
+{
+    return (a > b) ? a : b;
+}
 
 class Point
 {
@@ -16,10 +26,13 @@ public:
     // Copy constructor
     Point(const Point &other) : x(other.getX()), y(other.getY())
     {
-        std::cout << "Copied Point\n";
+        // std::cout << "Copied Point\n";
     }
 
-    ~Point() { std::cout << "Point destroyed.\n"; }
+    ~Point()
+    {
+        // std::cout << "Point destroyed.\n";
+    }
 
     // Accessors
     float getX() const { return this->x; }
@@ -102,7 +115,10 @@ public:
 
     LineSegment(const LineSegment &other) : p1(other.p1), p2(other.p2) {}
 
-    ~LineSegment() { std::cout << "Line segment destroyed\n"; }
+    ~LineSegment()
+    {
+        // std::cout << "Line segment destroyed\n";
+    }
 
     void translate(float dx, float dy)
     {
@@ -147,6 +163,41 @@ public:
     Rectangle(float w, float h) : width(w), height(h) {} // initialization list for efficiency
 
     float area() const { return width * height; }
+};
+
+class ShapeCollection
+{
+private:
+    std::vector<LineSegment> shape;
+
+public:
+    // Empty constructor
+    ShapeCollection() = default;
+    // The same as:
+    // ShapeCollection() : shape() {}
+
+    // Constructor
+    void add(const LineSegment &line)
+    {
+        this->shape.emplace_back(line);
+    }
+
+    void translate_all(const Point &delta)
+    {
+        for (auto &line : this->shape)
+            line.translate(delta.getX(), delta.getY());
+    }
+
+    void print_all() const
+    {
+        for (const auto &line : this->shape)
+            std::cout << line << "\n";
+    }
+
+    ~ShapeCollection()
+    {
+        std::cout << "Shape destroyed.\n";
+    }
 };
 
 int main()
@@ -198,6 +249,17 @@ int main()
     Rectangle r(2.3f, 4.1f);
     float area = r.area();
     std::cout << "Area: " << area << " \n";
+
+    ShapeCollection shape;
+    shape.add(l);
+    shape.add(t);
+    shape.add(k);
+
+    std::cout << "Original Collection of Shapes: \n";
+    shape.print_all();
+    shape.translate_all(d);
+    std::cout << "Translated Collection of Shapes by d: " << d << "\n";
+    shape.print_all();
 
     return 0; // RAII (Resource Acquisition Is Initialization) takes care of freeing any used memory
 }
