@@ -210,6 +210,38 @@ public:
     }
 };
 
+template <typename T>
+class ShapeCollectionShared
+{
+private:
+    std::vector<std::shared_ptr<T>> shapes;
+
+public:
+    ShapeCollectionShared() = default;
+
+    void add(const std::shared_ptr<T> &shape)
+    {
+        shapes.push_back(shape);
+    }
+
+    void translate_all(const Point &delta)
+    {
+        for (auto &s : shapes)
+            s->translate(delta.getX(), delta.getY()); // use -> for shared_ptr
+    }
+
+    void print_all() const
+    {
+        for (const auto &s : shapes)
+            std::cout << *s << "\n"; // dereference for printing
+    }
+
+    ~ShapeCollectionShared()
+    {
+        std::cout << "Shared ShapeCollection destroyed\n";
+    }
+};
+
 int main()
 {
     Point p(2.0f, 3.0f); // calls constructor
@@ -288,6 +320,19 @@ int main()
     for (auto &x : v)
         std::cout << x << " ";
     std::cout << ", with average = " << average(v) << "\n";
+
+    auto l1 = std::make_shared<LineSegment>(Point(0, 0), Point(1, 1));
+    auto l2 = std::make_shared<LineSegment>(Point(2, 2), Point(3, 3));
+
+    ShapeCollectionShared<LineSegment> sharedLines;
+    sharedLines.add(l1);
+    sharedLines.add(l2);
+    std::cout << "Original Shared Collection of Lines: \n";
+    sharedLines.print_all();
+
+    sharedLines.translate_all(Point(1, 0));
+    std::cout << "Translated Shared Collection of Lines by : " << Point(1, 0) << "\n";
+    sharedLines.print_all();
 
     return 0; // RAII (Resource Acquisition Is Initialization) takes care of freeing any used memory
 }
