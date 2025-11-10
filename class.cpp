@@ -4,11 +4,28 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <type_traits>
+#include <concepts>
+
+template <typename T>
+concept arithmetic = std::is_arithmetic_v<T>;
+
+template <arithmetic T>
+T multiply(T a, T b)
+{
+    return a * b;
+}
 
 template <typename T>
 T max_value(const T a, const T b)
 {
     return (a > b) ? a : b;
+}
+
+template <std::floating_point T>
+T divide(T a, T b)
+{
+    return a / b;
 }
 
 template <typename T>
@@ -18,6 +35,24 @@ T average(const std::vector<T> &v)
     for (auto &x : v)
         sum += x;
     return sum / v.size();
+}
+
+template <typename T>
+concept Printable = requires(T a) {
+    { std::cout << a } -> std::same_as<std::ostream &>;
+};
+
+// For this type T to satisfy Translatable, it must have a method translate(float, float) that returns void.
+template <typename T>
+concept Translatable = requires(T a, float dx, float dy) {
+    { a.translate(dx, dy) } -> std::same_as<void>;
+};
+
+template <Printable T>
+void print_all(const std::vector<T> &v)
+{
+    for (const auto &x : v)
+        std::cout << x << "\n";
 }
 
 class Point
@@ -174,7 +209,7 @@ public:
     float area() const { return width * height; }
 };
 
-template <typename T>
+template <Translatable T>
 class ShapeCollection
 {
 private:
@@ -192,13 +227,14 @@ public:
         this->shapes.emplace_back(elem);
     }
 
-    void translate_all(const Point &delta)
+    void translate_all(float dx, float dy)
     {
         for (auto &elem : this->shapes)
-            elem.translate(delta.getX(), delta.getY());
+            elem.translate(dx, dy);
     }
 
     void print_all() const
+        requires Printable<T>
     {
         for (const auto &elem : this->shapes)
             std::cout << elem << "\n";
@@ -304,21 +340,22 @@ int main()
 
     std::cout << "Original Collection of Points: \n";
     pointCloud.print_all();
-    pointCloud.translate_all(d);
+    pointCloud.translate_all(d.getX(), d.getY());
     std::cout << "Translated Collection of Points by d: " << d << "\n";
     pointCloud.print_all();
 
     std::cout << "Original Collection of Lines: \n";
     lineCloud.print_all();
-    lineCloud.translate_all(d);
+    lineCloud.translate_all(d.getX(), d.getY());
     std::cout << "Translated Collection of Lines by d: " << d << "\n";
     lineCloud.print_all();
 
     std::vector<int> v = {3, 4, 1, 2, 9};
     std::cout << "Point p: " << p << " with Max coordinates : " << max_value(p.getX(), p.getY()) << "\n";
     std::cout << "Vector v: ";
-    for (auto &x : v)
-        std::cout << x << " ";
+    // for (auto &x : v)
+    //     std::cout << x << " ";
+    print_all(v);
     std::cout << ", with average = " << average(v) << "\n";
 
     auto l1 = std::make_shared<LineSegment>(Point(0, 0), Point(1, 1));
@@ -333,6 +370,9 @@ int main()
     sharedLines.translate_all(Point(1, 0));
     std::cout << "Translated Shared Collection of Lines by : " << Point(1, 0) << "\n";
     sharedLines.print_all();
+
+    std::cout << "Test Multiply using Concepts : " << 6.5 << " * " << 3.4 << " = " << multiply(6.5, 3.4) << "\n";
+    std::cout << "Test Multiply using Concepts : " << 3 << " * " << -2 << " = " << multiply(3, -2) << "\n";
 
     return 0; // RAII (Resource Acquisition Is Initialization) takes care of freeing any used memory
 }
