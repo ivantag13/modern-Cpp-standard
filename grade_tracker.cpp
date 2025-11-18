@@ -29,17 +29,18 @@
 //     ~GradeTracker() {}
 // };
 
-void add_grade(std::map<std::string, std::vector<int>> &tracker, std::string name, int grade)
+void add_grade(std::map<std::string, std::vector<int>> &tracker, const std::string &name, const int grade)
 {
     tracker[name].push_back(grade);
 }
 
-void avg_per_student(std::map<std::string, std::vector<int>> &tracker)
+void avg_per_student(const std::map<std::string, std::vector<int>> &tracker)
 {
     for (const auto &[name, v] : tracker)
     {
-        std::cout << "Average grade for " << name << ": ";
-        std::cout << std::accumulate(v.begin(), v.end(), 0) / v.size() << "\n";
+        double sum = static_cast<double>(std::accumulate(v.begin(), v.end(), double{0}));
+        double avg = sum / static_cast<double>(v.size());
+        std::cout << name << " -> " << avg << "\n";
     }
 }
 
@@ -52,7 +53,9 @@ void descending_avg(std::map<std::string, std::vector<int>> &tracker)
         else
             return a.first < b.first;
     };
+
     std::set<std::pair<std::string, double>, decltype(cmp)> desc_set(cmp);
+
     for (const auto &[name, v] : tracker)
     {
         double sum = static_cast<double>(std::accumulate(v.begin(), v.end(), double{0}));
@@ -60,7 +63,7 @@ void descending_avg(std::map<std::string, std::vector<int>> &tracker)
         desc_set.insert({name, avg});
     }
     for (const auto &[name, avg] : desc_set)
-        std::cout << "Student " << name << ": " << avg << " \n";
+        std::cout << name << " -> " << avg << " \n";
 }
 
 int main()
@@ -75,16 +78,20 @@ int main()
     add_grade(tracker, "Ana", 8);
     add_grade(tracker, "Ana", 5);
 
+    std::cout << "Grades: \n";
     for (const auto &[name, v] : tracker)
     {
-        std::cout << "Grade for " << name << ": ";
+        std::cout << name << " -> ";
         for (const auto &grade : v)
             std::cout << grade << " ";
+        std::cout << "\n";
     }
     std::cout << "\n";
 
+    std::cout << "Students averages (alphabetical): \n";
     avg_per_student(tracker);
 
+    std::cout << "Students averages (descending): \n";
     descending_avg(tracker);
 
     return 0;
