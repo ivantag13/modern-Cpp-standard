@@ -14,7 +14,7 @@
 
 int main()
 {
-    auto loop = std::views::iota(1, 51) | std::views::filter([](auto x)
+    auto loop = std::views::iota(1, 51) | std::views::filter([](const auto x)
                                                              { return x % 2 == 1; });
     for (auto x : loop)
         std::cout << x << " ";
@@ -22,15 +22,21 @@ int main()
 
     std::vector<int>
         v = {3, 5, 6, 10, 12};
-    auto range = v | std::views::filter([](auto const &x)
+    auto range = v | std::views::filter([](const auto &x)
                                         { auto &y = x;
                                             return y % 3 == 0; }) |
-                 std::views::transform([](auto const &x)
+                 std::views::transform([](const auto &x)
                                        { auto &y = x;
                                          return y * y; });
     for (auto &&x : range)
         std::cout << x << " ";
     std::cout << "\n";
 
-    return 0;
+    auto test = std::views::iota(1, 101) | std::views::drop(50) | std::views::take(10) | std::views::transform([](const auto x)
+                                                                                                               { return x * 2; });
+
+    for (auto x : test)
+        std::cout << x << " ";
+
+        return 0;
 }
