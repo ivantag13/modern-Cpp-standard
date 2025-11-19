@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <ranges>
 
 // class GradeTracker
 // {
@@ -76,7 +77,7 @@ int main()
     add_grade(tracker, "Julio", 10);
     add_grade(tracker, "Ana", 7);
     add_grade(tracker, "Ana", 8);
-    add_grade(tracker, "Ana", 5);
+    add_grade(tracker, "Ana", 10);
 
     std::cout << "Grades: \n";
     for (const auto &[name, v] : tracker)
@@ -93,6 +94,30 @@ int main()
 
     std::cout << "Students averages (descending): \n";
     descending_avg(tracker);
+
+    // Something similar as before but using views and ranges
+    std::cout << "Students averages greater than 7 (descending order): \n";
+
+    auto averages = tracker | std::views::transform([](const auto &pair)
+                                                    { auto& [name, grades] = pair;
+                                                        int sum = std::accumulate(grades.begin(), grades.end(), 0);
+                                                        int avg = sum / grades.size();
+                                                        return std::pair{name, avg}; }) |
+                    std::views::filter([](const auto &pair)
+                                       { return pair.second > 7; });
+
+    std::vector<std::pair<std::string, int>> result;
+    for (auto &&p : averages)
+        result.push_back(std::move(p));
+
+    std::ranges::sort(result, [](const auto &a, const auto &b)
+                      { if(a.second != b.second)
+                            return a.second > b.second;
+                        else
+                            return a.first < b.first; });
+
+    for (auto &p : result)
+        std::cout << p.first << " -> " << p.second << "\n";
 
     return 0;
 }
